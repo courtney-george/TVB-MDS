@@ -207,7 +207,7 @@ KM(Ideal, Matrix, ZZ) := List => (L, DMat, limit) -> (
 
 end--
 restart
-needs "KM Algorithm.m2"
+needs "KM.m2"
 peek User#"private dictionary"
 
 S = QQ[y_0, y_1, y_2]
