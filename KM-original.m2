@@ -112,7 +112,7 @@ adaptedBasis = (L, w, alggens, originalRing) -> (--input is the ideal L, the wei
 QRing = (L,D') -> ( --imput is ideal and diagram matrix
     tempR = QQ[gens ring L,t_1..t_#D', s_1..s_#D']; --polynomial ring with all the necessary variables
     Ilist = {};
-    for i from 1 to #D do Ilist = append(Ilist, t_i*s_i-1); --list of relations that make t and s units
+    for i from 1 to #D' do Ilist = append(Ilist, t_i*s_i-1); --list of relations that make t and s units
     R = tempR/ideal(Ilist); --quotient by the previous list to make the variables t and s invertible
     return R; --return the quotient ring
     )
@@ -149,3 +149,25 @@ KM = (L, DMat, limit) -> (  --input is ideal L, matrix D, and positive integer "
     return drop(kBasis_#D', {#D'-1, #D'-1}); --return basis and remove the additional variable created for the zero row
 
     )
+
+--
+end
+restart
+needs "KM-original.m2"
+peek User#"private dictionary"
+
+-- ex: tangent bundle on PP^2
+S = QQ[y_0, y_1, y_2]
+L = ideal(y_0 + y_1 + y_2)
+D = id_(ZZ^3)
+
+KM(L, entries D, 15) -- ~0.56s
+
+--
+S = QQ[y_0, y_1, y_2, y_3]
+L = ideal(y_0 + y_1 + y_2 + y_3)
+D = matrix{
+    {1,1,0,0},
+    {0,1,1,0},
+    {0,0,1,1}}
+elapsedTime KM(L, entries D, 15) -- ~2.52s
