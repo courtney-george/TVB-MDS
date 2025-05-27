@@ -168,7 +168,8 @@ KM(Ideal, Matrix, ZZ) := List => (L, DMat, limit) -> (
     KB := new MutableList;
     KB#0 = toList(s_1..s_n0) | gens ring L;
 
-    I := null;
+    D := D0;
+    I = null;
     B := {};
 
     newBasis := new MutableList;
@@ -187,12 +188,12 @@ KM(Ideal, Matrix, ZZ) := List => (L, DMat, limit) -> (
 	-- khovanskii basis algorithm to add an additional generator,
 	-- if needed. Delete any additional zeros if necessary.
 	-- ~55% of the computation is here
-	(D0, B, I) = khovanskiiBasis(w, R, alggens#k, limit, D0, k);
+	(D, B, I) = khovanskiiBasis(w, R, alggens#k, limit, D, k);
 	newBasis#k = delete(0, B);
 
 	-- create a list of t's to homogenize the new basis.
 	-- Powers of t come from the entries of the matrix.
-	expT#(k+1) = flatten prepend(oneList, apply(D0_k, j -> t_(k+1)^j));
+	expT#(k+1) = flatten prepend(oneList, apply(D_k, j -> t_(k+1)^j));
 	-- sub the previous list into the ring R
 	expT#(k+1) = apply((expT#(k+1)), j -> sub(j, R));
 
@@ -201,32 +202,35 @@ KM(Ideal, Matrix, ZZ) := List => (L, DMat, limit) -> (
 	);
     -- remove the additional variable created for the zero row
     KB#(n0+1) = drop(KB#n0, {n0-1, n0-1});
-    error 0;
     -- return the final Khovanskii basis and Cox ring
-    (last KB, quotient I))
+    (matrix {last KB}, quotient I))
 
 end--
 restart
 needs "KM.m2"
 peek User#"private dictionary"
 
+-- ex: tangent bundle on PP^2
 S = QQ[y_0, y_1, y_2]
 L = ideal(y_0 + y_1 + y_2)
 D = id_(ZZ^3)
 
-KM(L, D, 15) -- ~0.56s
+(B, R) = KM(L, D, 15) -- ~0.56s
+describe R
 
 profile KM(L, D, 15) -- ~0.56s
-profileSummary "KM Alg"
+profileSummary "KM"
 
+
+restart
+needs "KM.m2"
 
 S = QQ[y_0, y_1, y_2, y_3]
 L = ideal(y_0 + y_1 + y_2 + y_3)
-
 D = matrix{
     {1,1,0,0},
     {0,1,1,0},
     {0,0,1,1}}
-elapsedTime KM(L, D, 15) -- ~2.52s
-describe tempR
-I
+
+(B, R) = elapsedTime KM(L, D, 15) -- ~2.52s
+describe R
