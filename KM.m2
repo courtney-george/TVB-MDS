@@ -33,6 +33,7 @@ associatedWeight = (w, inB) -> for b in inB list (
 -- Output is a list of algebra generators with at most one additional generator
 -- added to the list to bring it closer to being a Khovanskii basis.
 khovanskiiBasis = (w, R, algebraGens, limit, D, count) -> (
+    assert(class \ (w, R, algebraGens, limit, D, count) === (List, QuotientRing, List, ZZ, List, ZZ));
     -- number of rays of the ambient toric variety, fixed
     n0 := #D;
     -- number of columns of D
@@ -67,7 +68,7 @@ khovanskiiBasis = (w, R, algebraGens, limit, D, count) -> (
     I := ker phi; -- kernel of first map, phi
     J := ker psi; -- kernel of second map, psi
 
-    if I == 0 then return toList B;
+    if I == 0 then return (D, select(toList B, not zero), I);
 
     -- creates the weight associated to w in the ring S
     u := associatedWeight(w, inB);
@@ -169,7 +170,6 @@ KM(Ideal, Matrix, ZZ) := List => (L, DMat, limit) -> (
     KB#0 = toList(s_1..s_n0) | gens ring L;
 
     D := D0;
-    I = null;
     B := {};
 
     newBasis := new MutableList;
@@ -233,4 +233,22 @@ D = matrix{
     {0,0,1,1}}
 
 (B, R) = elapsedTime KM(L, D, 15) -- ~2.52s
+describe R
+
+-- new examples:
+-- PP(Sym^2(TPP^2))
+restart
+needs "KM.m2"
+
+S = QQ[y_(0,1), y_(0,2), y_(1,2), y_(0,0), y_(1,1), y_(2,2)]
+D = matrix {{1,1,0}, {1,0,1}, {0,1,1}} | (2 * id_(ZZ^3))
+L = ideal apply(3, r -> sum(6, c -> if D_(r,c) == 0 then 0 else S_c))
+(B, R) = elapsedTime KM(L, D, 15) -- 1.2s
+describe R
+
+-- PP(TPP^2 ++ TPP^2)
+S = QQ[y_(0,0), y_(1,0), y_(2,0), y_(0,1), y_(1,1), y_(2,1)]
+D = id_(ZZ^3) | id_(ZZ^3)
+L = ideal(y_(0,0) + y_(1,0) + y_(2,0), y_(0,1) + y_(1,1) + y_(2,1))
+(B, R) = elapsedTime KM(L, D, 15) -- 1.2s
 describe R
